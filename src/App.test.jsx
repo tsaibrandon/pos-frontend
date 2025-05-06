@@ -55,12 +55,13 @@ describe('App Component', () => {
 
     // Verify items are in the cart
     expect(screen.getByText('Burger')).toBeInTheDocument()
+    expect(screen.getByText('Pizza')).toBeInTheDocument()
 
     // Find and click the "Remove" button
     const removeButton = screen.getAllByText('Remove')
-    fireEvent.click(removeButton[1])
+    fireEvent.click(removeButton[0])
 
     // Verify that only "Burger" was removed
-    expect(screen.queryByText('Pizza')).not.toBeInTheDocument()
+    expect(screen.queryByText('Burger')).not.toBeInTheDocument()
   })
 })
