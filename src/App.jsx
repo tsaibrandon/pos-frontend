@@ -8,6 +8,10 @@ export default function App() {
   const [screen, setScreen] = useState('menu')
 
   const addToCart = (item) => setCart([...cart, item])
+  const removeFromCart = (index) => {
+    const newCart = cart.filter((_, i) => i != index)
+    setCart(newCart)
+  }
 
   const total = cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)
 
@@ -37,7 +41,11 @@ export default function App() {
           <div>
             <h2 className="text-lg font-bold mb-2">Cart</h2>
             {cart.map((item, i) => (
-              <CartItem key={i} item={item} />
+              <CartItem 
+                key={i} 
+                item={item} 
+                removeFromCart = {() => removeFromCart(i)}
+              />
             ))}
             <div className="mt-4 font-bold">Total: ${total}</div>
             <button
