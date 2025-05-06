@@ -40,4 +40,27 @@ describe('App Component', () => {
     expect(screen.queryByText('Burger')).not.toBeInTheDocument()
     expect(screen.queryByText('Pizza')).not.toBeInTheDocument()
   })
+
+  it('removes the item from the cart when remove button is clicked', () => {
+    render(<App />)
+
+    // Simulate adding items to the cart
+    const addToCartButtons = screen.getAllByText('Add to Cart')
+    fireEvent.click(addToCartButtons[0])
+    fireEvent.click(addToCartButtons[1])
+
+    // Navigate to the cart screen
+    const cartButton = screen.getByRole('button', { name: /Cart \(\d+\)/i })
+    fireEvent.click(cartButton)
+
+    // Verify items are in the cart
+    expect(screen.getByText('Burger')).toBeInTheDocument()
+
+    // Find and click the "Remove" button
+    const removeButton = screen.getAllByText('Remove')
+    fireEvent.click(removeButton[1])
+
+    // Verify that only "Burger" was removed
+    expect(screen.queryByText('Pizza')).not.toBeInTheDocument()
+  })
 })
