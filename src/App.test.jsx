@@ -57,11 +57,18 @@ describe('App Component', () => {
     expect(screen.getByText('Burger')).toBeInTheDocument()
     expect(screen.getByText('Pizza')).toBeInTheDocument()
 
-    // Find and click the "Remove" button
-    const removeButton = screen.getAllByText('Remove')
-    fireEvent.click(removeButton[0])
-
-    // Verify that only "Burger" was removed
+    // Find and click the first "Remove" button
+    const firstRemove = screen.getAllByText('Remove')[0]
+    fireEvent.click(firstRemove)
+    // Verify that 'Burger' was removed and 'Pizza' is still there
     expect(screen.queryByText('Burger')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pizza')).toBeInTheDocument()
+
+    // Find and click the first "Remove" button
+    const secondRemove = screen.getByText('Remove')
+    fireEvent.click(secondRemove)
+    // Verify that 'Burger' was removed and 'Pizza' is still there
+    expect(screen.queryByText('Pizza')).not.toBeInTheDocument()
+    
   })
 })
