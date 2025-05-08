@@ -12,6 +12,7 @@ export default function App() {
     const newCart = cart.filter((_, i) => i != index)
     setCart(newCart)
   }
+  
   const emptyCart = () => {
     // A pop-up that confirms that the user is emptying their cart
     if(window.confirm('Are you sure you want to clear your cart?')) {
