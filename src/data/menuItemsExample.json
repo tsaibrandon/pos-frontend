@@ -1,8 +1,0 @@
-[
-    { "id": 1, "title": "Burger", "price": 8.99, "image": "https://placehold.co/400x300" },
-    { "id": 2, "title": "Pizza", "price": 12.99, "image": "https://placehold.co/400x300" },
-    { "id": 3, "title": "Fries", "price": 4.99, "image": "https://placehold.co/400x300" },
-    { "id": 4, "title": "Salad", "price": 6.99, "image": "https://placehold.co/400x300" },
-    { "id": 5, "title": "Soda", "price": 1.99, "image": "https://placehold.co/400x300" },
-    { "id": 6, "title": "Ice Cream", "price": 3.99, "image": "https://placehold.co/400x300" }
-]
