@@ -12,6 +12,8 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.8",
+    "graphql": "^16.11.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
