@@ -25,6 +25,14 @@ export default function App() {
     const updatedCart = [...cart, item];
     setCart(updatedCart);
   }
+  
+  const emptyCart = () => {
+    // A pop-up that confirms that the user is emptying their cart
+    if(window.confirm('Are you sure you want to clear your cart?')) {
+      // Clear the cart
+      setCart([]);
+    }
+  }
 
   function removeFromCart(indexToRemove) {
     const updatedCart = cart.filter((_, currentIndex) => {
@@ -79,13 +87,21 @@ export default function App() {
             <div className="mt-4 font-bold">Total: ${total}</div>
             <button
               onClick={checkout} // Call the checkout function
-              className="mt-2 px-4 py-2 bg-green-600 text-white rounded"
+              className="mt-2 px-4 py-2 bg-green-600 text-white rounded mr-2"
             >
               Checkout
+            </button>
+            <button
+              onClick={emptyCart} // Call the emptyCart function
+              disabled={cart.length === 0} // Clear button is disabled when cart is empty
+              className="mt-2 px-4 py-2 bg-red-500 text-white rounded ml-2 disabled:opacity-50"
+            >
+              Clear
             </button>
           </div>
         )}
       </div>
+
       <div className="flex justify-around border-t p-2">
         <button onClick={() => setScreen('menu')} className="text-blue-600">
           Menu
