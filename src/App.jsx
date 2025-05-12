@@ -1,16 +1,29 @@
 import { useState } from 'react'
 import MenuItem from './components/MenuItem'
 import CartItem from './components/CartItem'
-import menuItems from './data/menuItemsExample.json'
+import { gql, useQuery } from '@apollo/client';
+
+const GET_MENU_ITEMS = gql`
+query {
+  defaultMenu {
+    id
+    image
+    price
+    title
+  }
+}
+`;
 
 export default function App() {
   const [cart, setCart] = useState([])
   const [screen, setScreen] = useState('menu')
 
-  const addToCart = (item) => setCart([...cart, item])
-  const removeFromCart = (index) => {
-    const newCart = cart.filter((_, i) => i != index)
-    setCart(newCart)
+  const { loading, error, data } = useQuery(GET_MENU_ITEMS);
+
+  // Cart Handlers
+  function addToCart(item) {
+    const updatedCart = [...cart, item];
+    setCart(updatedCart);
   }
   
   const emptyCart = () => {
@@ -21,27 +34,43 @@ export default function App() {
     }
   }
 
-  const total = cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)
+  function removeFromCart(indexToRemove) {
+    const updatedCart = cart.filter((_, currentIndex) => {
+      return currentIndex !== indexToRemove;
+    });
+    setCart(updatedCart);
+  }
 
+  // Calculating Cart Total
+  let total = 0;
+
+  for (let item of cart) {
+    total += item.price;
+  }
+
+  total = total.toFixed(2);
+
+  // Checkout Handler
   const checkout = () => {
-    // Create a string representation of the order
     const orderDetails = cart
       .map((item) => `${item.title} - $${item.price}`)
       .join('\n')
 
-    // Show the pop-up with the order details and a completion message
     window.alert(`Your Order:\n\n${orderDetails}\n\nTotal: $${total}\n\nORDER IS COMPLETE`)
 
-    // Clear the cart
     setCart([])
   }
+
+  // Conditional Rendering (Dependent on Backend Data)
+  if (loading) return <p>Loading menu...</p>;
+  if (error) return <p>Error :(</p>;
 
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 p-4">
         {screen === 'menu' ? (
           <div className="grid grid-cols-4 gap-4">
-            {menuItems.map((item) => (
+            {data.defaultMenu.map((item) => (
               <MenuItem key={item.id} item={item} addToCart={addToCart} />
             ))}
           </div>
