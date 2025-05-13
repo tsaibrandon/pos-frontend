@@ -1,4 +1,8 @@
 export default function CartItem({ item, removeFromCart }) {
+    const formatPrice = (price) => {
+      return Number(price).toFixed(2)
+    }
+
     return (
       <div className="flex justify-between border-b py-1">
         {/* Item in Cart */}
@@ -7,7 +11,7 @@ export default function CartItem({ item, removeFromCart }) {
         {/* Right Side */}
         <div className="flex items-center gap-2">
           {/* Price */}
-          <span>${item.price}</span> 
+          <span>${formatPrice(item.price)}</span> 
           
           {/* Remove From Cart Button */}
           <button 
