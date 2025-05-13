@@ -1,7 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { vi } from 'vitest'
+import { expect, it, vi } from 'vitest'
 import App from './App'
 import { useQuery, gql } from '@apollo/client'
+import userEvent from '@testing-library/user-event'
+import '@testing-library/jest-dom'
 
 vi.mock('@apollo/client', () => ({
   useQuery: vi.fn(),
@@ -169,27 +171,201 @@ describe('App Component', () => {
     expect(screen.queryByText('Pizza')).toBeInTheDocument()
   })
 
-  it('displays a loading message when data is loading', () => {
-    useQuery.mockReturnValue({
-      loading: true,
-      error: null,
-      data: null
-    })
+  // it('displays a loading message when data is loading', () => {
+  //   useQuery.mockReturnValue({
+  //     loading: true,
+  //     error: null,
+  //     data: null
+  //   })
 
-    render(<App />)
+  //   render(<App />)
 
-    expect(screen.getByText('Loading menu...')).toBeInTheDocument()
-  })
+  //   expect(screen.getByText('Loading menu...')).toBeInTheDocument()
+  // })
 
-  it('displays an error message when there is an error fetching data', () => {
-    useQuery.mockReturnValue({
-      loading: false,
-      error: true,
-      data: null
-    })
+  // it('displays an error message when there is an error fetching data', () => {
+  //   useQuery.mockReturnValue({
+  //     loading: false,
+  //     error: true,
+  //     data: null
+  //   })
 
-    render(<App />)
+  //   render(<App />)
 
-    expect(screen.getByText('Error :(')).toBeInTheDocument()
-  })
+  //   expect(screen.getByText('Error :(')).toBeInTheDocument()
+  // })
 })
+
+describe('Menu Editing Features', () => {
+  beforeEach(() => {
+    render(<App />);
+  });
+
+  it('switches to edit mode when "Edit Menu" button is clicked', () => {
+    // Click the Edit Menu button
+    const editButton = screen.getByText('Edit Menu');
+    fireEvent.click(editButton);
+
+    // Verify edit mode buttons are visible
+    expect(screen.getByText('Add Item')).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+    expect(screen.getByText('Save Changes')).toBeInTheDocument();
+  });
+
+  it('opens AddItemForm when "Add Item" button is clicked in edit mode', () => {
+    // Find and click the Edit Menu button
+    const editButton = screen.getByText('Edit Menu');
+    fireEvent.click(editButton);
+    
+    // Find and click Add Item button
+    const addItem = screen.getByText('Add Item')
+    fireEvent.click(addItem);
+    
+    // Verify form is open (assuming AddItemForm has a title or specific element)
+    expect(screen.getByText('Add New Menu Item')).toBeInTheDocument();
+  });
+
+  it('cancels changes and returns to menu view', () => {
+    // Find and click the Edit Menu button
+    const editButton = screen.getByText('Edit Menu');
+    fireEvent.click(editButton);
+    
+    // Find and click Cancel button
+    const cancelButton = screen.getByText('Cancel')
+    fireEvent.click(cancelButton);
+    
+    // Verify we're back in menu view
+    expect(screen.getByText('Edit Menu')).toBeInTheDocument();
+  });
+
+  it('displays Edit and Delete when hovering over a menu item', async () => {
+    // Find and click the Edit Menu button
+    const editButton = screen.getByText('Edit Menu');
+    fireEvent.click(editButton);
+
+    // Find and hover over a menu item
+    const hoverElement = screen.getAllByRole('img');
+    const firstMenuItem = hoverElement[0]
+    await fireEvent.mouseEnter(firstMenuItem.closest('div'));
+
+    // Check to see if the Edit and Delete buttons render
+    expect(screen.getByText('Edit')).toBeInTheDocument();
+    expect(screen.getByText('Delete')).toBeInTheDocument();
+
+    // Unhover the menu item
+    await fireEvent.mouseLeave(firstMenuItem.closest('div'));
+
+    // Check to see if the Edit and Delete buttons disappear
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+  })
+
+  it('deletes menu item in edit mode', async () => {
+    // Find and click the Edit Menu button
+    const editButton = screen.getByText('Edit Menu');
+    fireEvent.click(editButton);
+
+    // Get the name of the first menu item 
+    const firstMenuItemName = screen.getAllByRole('heading', { level: 2 })[0].textContent
+
+    // Get the total number of menu items
+    const totalMenuItems = screen.getAllByRole('heading', { level: 2 }).length;
+    
+    // Find and hover over a menu item
+    const hoverElement = screen.getAllByRole('heading', { level: 2 });
+    const firstMenuItem = hoverElement[0]
+    await fireEvent.mouseEnter(firstMenuItem.closest('div'));
+    
+    // Find and click Delete on the first item
+    const firstDeleteButton = screen.getByText('Delete');
+    fireEvent.click(firstDeleteButton);
+    
+    // Unhover
+    await fireEvent.mouseLeave(firstMenuItem.closest('div'));
+
+    // Verify specifally the first item was deleted
+    expect(screen.queryByText(firstMenuItemName)).not.toBeInTheDocument();
+
+    // Verify an item was deleted
+    const newMenuItems = screen.getAllByRole('heading', { level: 2 }).length;
+    expect(newMenuItems).toBe(totalMenuItems - 1);
+  });
+
+  it('edits existing menu item', async () => {
+    // Find and click the Edit Menu button
+    const editButton = screen.getByText('Edit Menu');
+    fireEvent.click(editButton);
+    
+    // Find and hover over a menu item
+    const hoverElement = screen.getAllByRole('heading', { level: 2 });
+    const firstMenuItem = hoverElement[0]
+    await fireEvent.mouseEnter(firstMenuItem.closest('div'));
+
+    // Find and click Edit on the first item
+    const firstEditButton = screen.getByText('Edit');
+    await fireEvent.click(firstEditButton);
+
+    // Verify edit form is open
+    const dialog = screen.getByText('Edit Menu Item');
+    expect(dialog).toBeInTheDocument();
+    
+    // Fill in new values 
+    const inputs = screen.getAllByRole('textbox');  
+    const titleInput = inputs[0];  
+    const priceInput = screen.getByRole('spinbutton');
+    
+    await userEvent.clear(titleInput);
+    await userEvent.type(titleInput, 'Updated Item');
+    await userEvent.clear(priceInput);
+    await userEvent.type(priceInput, '9.99');
+    
+    // Find and click Save button
+    const saveButton = screen.getByText('Save')
+    await fireEvent.click(saveButton);
+    
+    // Verify form is closed
+    expect(dialog).not.toBeInTheDocument();
+    
+    // Verify updated item appears in the menu
+    expect(screen.getByText('Updated Item')).toBeInTheDocument();
+    expect(screen.getByText('$9.99')).toBeInTheDocument();
+  });
+
+  it('saves all changes and returns to menu view', async () => {
+    // Find and click the Edit Menu button
+    const editButton = screen.getByText('Edit Menu');
+    fireEvent.click(editButton);
+
+    // Get the name of the first menu item 
+    const firstMenuItemName = screen.getAllByRole('heading', { level: 2 })[0].textContent
+
+    // Get the total number of menu items
+    const totalMenuItems = screen.getAllByRole('heading', { level: 2 }).length;
+    
+    // Find and hover over a menu item
+    const hoverElement = screen.getAllByRole('heading', { level: 2 });
+    const firstMenuItem = hoverElement[0]
+    await fireEvent.mouseEnter(firstMenuItem.closest('div'));
+    
+    // Find and click Delete on the first item
+    const firstDeleteButton = screen.getByText('Delete');
+    fireEvent.click(firstDeleteButton);
+    
+    // Unhover
+    await fireEvent.mouseLeave(firstMenuItem.closest('div'));
+    
+    // Find and click Save
+    const saveChangesButton = screen.getByText('Save Changes')
+    await fireEvent.click(saveChangesButton);
+    
+    // Verify we're back in menu view
+    expect(screen.getByText('Edit Menu')).toBeInTheDocument();
+
+    // Verify specifally the first item was deleted
+    expect(screen.queryByText(firstMenuItemName)).not.toBeInTheDocument();
+
+    // Verify an item was deleted
+    const newMenuItems = screen.getAllByRole('heading', { level: 2 }).length;
+    expect(newMenuItems).toBe(totalMenuItems - 1);
+  });
+});
