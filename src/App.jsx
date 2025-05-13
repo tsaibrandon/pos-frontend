@@ -20,6 +20,7 @@ import menuItemsData from './data/menuItemsExample.json'
 export default function App() {
   const [cart, setCart] = useState([])
   const [screen, setScreen] = useState('menu')
+  // const { loading, error, data } = useQuery(GET_MENU_ITEMS);
   const [isAddItemFormOpen, setAddItemFormOpen] = useState(false)
   // Add these new state variables for menu management
   const [menuItems, setMenuItems] = useState(menuItemsData);
